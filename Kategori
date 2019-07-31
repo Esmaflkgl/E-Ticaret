@@ -1,0 +1,104 @@
+ public partial class Form2 : Form
+    {
+        string baglantiYolu = @"Data Source=(LocalDB)\v11.0;AttachDbFilename=C:\Users\ASUS\Documents\e-ticaret.mdf;Integrated Security=True;Connect Timeout=30";
+        public Form2()
+        {
+            InitializeComponent();
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        public void Ekle(int KatID, string UrunAdi, string Aciklama, string Fiyat, string Stok)
+        {
+            SqlConnection baglanti = new SqlConnection(baglantiYolu);
+            SqlCommand komut = new SqlCommand();
+            komut.Connection = baglanti;
+            komut.CommandType = CommandType.Text;
+            komut.CommandText = "insert into Urunler values (@pkatID, @purunAdi, @paciklama, @pfiyat, @pstok)";
+
+            komut.Parameters.AddWithValue("@pkatID", KatID);
+            komut.Parameters.AddWithValue("@purunAdi", UrunAdi);
+            komut.Parameters.AddWithValue("@paciklama", Aciklama);
+            komut.Parameters.AddWithValue("@pfiyat", Fiyat);
+            komut.Parameters.AddWithValue("@pstok", Stok);
+
+            baglanti.Open();
+            komut.ExecuteNonQuery();
+            baglanti.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int KatID = (int)comboBox1.SelectedIndex;
+            string UrunAdi = textBox1.Text;
+            string Aciklama = textBox2.Text;
+            string Fiyat = textBox3.Text;
+            string Stok = textBox4.Text;
+
+            Ekle(KatID, UrunAdi, Aciklama, Fiyat, Stok);
+            MessageBox.Show("Ürün eklendi.");
+        }
+
+        public DataSet KategoriCek()
+        {
+            SqlConnection baglanti = new SqlConnection(baglantiYolu);
+            SqlCommand komut = new SqlCommand();
+            komut.Connection = baglanti;
+            komut.CommandType = CommandType.Text;
+            komut.CommandText = "select * from Kategoriler";
+            SqlDataAdapter adaptor = new SqlDataAdapter();
+            adaptor.SelectCommand = komut;
+            DataSet kategoriler = new DataSet();
+
+            baglanti.Open();
+            adaptor.Fill(kategoriler);
+            baglanti.Close();
+
+            return kategoriler;
+        }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            comboBox1.DisplayMember = "KatAdi";
+            comboBox1.ValueMember = "KatID";
+            DataSet sonuc = KategoriCek();
+            comboBox1.DataSource = sonuc.Tables[0];
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form3 frm3 = new Form3();
+            frm3.Show();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form4 frm4 = new Form4();
+            frm4.Show();
+        }
+
+        public void Ekle(string KatAdi)
+        {
+            SqlConnection baglanti = new SqlConnection(baglantiYolu);
+            SqlCommand komut = new SqlCommand();
+            komut.Connection = baglanti;
+            komut.CommandType = CommandType.Text;
+            komut.CommandText = "insert into Kategoriler values (@pkatAdi)";
+
+            komut.Parameters.AddWithValue("@pkatAdi", KatAdi);
+
+            baglanti.Open();
+            komut.ExecuteNonQuery();
+            baglanti.Close();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            string KatAdi = textBox5.Text;
+            Ekle(KatAdi);
+            MessageBox.Show("Kategori eklendi.");
+        }
+    }
