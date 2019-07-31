@@ -1,0 +1,101 @@
+ public partial class Form3 : Form
+    {
+        string baglantiYolu = @"Data Source=(LocalDB)\v11.0;AttachDbFilename=C:\Users\ASUS\Documents\e-ticaret.mdf;Integrated Security=True;Connect Timeout=30";
+        public Form3()
+        {
+            InitializeComponent();
+        }
+
+        public DataSet Arama(string urunAdi)
+        {
+            SqlConnection baglanti = new SqlConnection(baglantiYolu);
+            SqlCommand komut = new SqlCommand();
+            komut.Connection = baglanti;
+            komut.CommandType = CommandType.Text;
+            komut.CommandText = "select * from Urunler where UrunAdi like @padi+'%' ";
+            komut.Parameters.AddWithValue("@padi", urunAdi);
+            SqlDataAdapter adaptor = new SqlDataAdapter();
+            adaptor.SelectCommand = komut;
+            DataSet sonuclar = new DataSet();
+
+            baglanti.Open();
+            adaptor.Fill(sonuclar);
+            baglanti.Close();
+
+            return sonuclar;
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            DataSet bulunanlar = Arama(textBox1.Text);
+            dataGridView1.DataSource = bulunanlar.Tables[0];
+        }
+
+        public void Duzenle(int UrunID, string yeniAd, string yeniAciklama, string yeniFiyat, string yeniStok)
+        {
+            SqlConnection baglanti = new SqlConnection(baglantiYolu);
+            SqlCommand komut = new SqlCommand();
+            komut.Connection = baglanti;
+            komut.CommandType = CommandType.Text;
+            komut.CommandText = "update Urunler set UrunAdi=@padi,Aciklama=@paciklama,Fiyat=@pfiyat,Stok=@pstok where UrunID=@purunID";
+
+            komut.Parameters.AddWithValue("@purunID", UrunID);
+            komut.Parameters.AddWithValue("@padi", yeniAd);
+            komut.Parameters.AddWithValue("@paciklama", yeniAciklama);
+            komut.Parameters.AddWithValue("@pfiyat", yeniFiyat);
+            komut.Parameters.AddWithValue("@pstok", yeniStok);
+
+            baglanti.Open();
+            komut.ExecuteNonQuery();
+            baglanti.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int UrunID = (int)dataGridView1.SelectedRows[0].Cells[0].Value;
+            string yeniAd = textBox2.Text;
+            string yeniAciklama = textBox3.Text;
+            string yeniFiyat = textBox4.Text;
+            string yeniStok = textBox5.Text;
+
+            Duzenle(UrunID, yeniAd, yeniAciklama, yeniFiyat, yeniStok);
+            MessageBox.Show("Duzenlendi");
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                int UrunID = (int)dataGridView1.SelectedRows[0].Cells[0].Value;
+                string urunAdi = dataGridView1.SelectedRows[0].Cells[2].Value.ToString();
+                string aciklama = dataGridView1.SelectedRows[0].Cells[3].Value.ToString();
+                string fiyat = dataGridView1.SelectedRows[0].Cells[4].Value.ToString();
+                string stok = dataGridView1.SelectedRows[0].Cells[5].Value.ToString();
+
+                textBox2.Text = urunAdi;
+                textBox3.Text = aciklama;
+                textBox4.Text = fiyat;
+                textBox5.Text = stok;
+            }
+        }
+
+        public void Sil(string UrunAdi)
+        {
+            string sorgu = "DELETE from Urunler where UrunAdi=@purunAdi";
+            SqlConnection baglanti = new SqlConnection(baglantiYolu);
+            SqlCommand komut = new SqlCommand(sorgu, baglanti);
+            komut.Parameters.AddWithValue("@purunAdi", UrunAdi);
+
+            baglanti.Open();
+            komut.ExecuteNonQuery();
+            baglanti.Close();
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string UrunAdi = (string)dataGridView1.SelectedRows[0].Cells[2].Value;
+            Sil(UrunAdi);
+            MessageBox.Show("Ürün silindi.");
+        }
+    }
